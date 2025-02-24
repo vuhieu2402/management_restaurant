@@ -1,0 +1,60 @@
+.auth-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    background: #fff;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25),
+        0 10px 10px rgba(0, 0, 0, 0.22);
+    max-width: 400px;
+    margin: auto;
+}
+
+.auth-container input {
+    width: 100%;
+    padding: 10px;
+    margin: 8px 0;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+}
+
+.auth-container button {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    background-color: #ff4b2b;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.auth-container .toggle-btn {
+    background: none;
+    border: none;
+    color: #ff4b2b;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.auth-container .error {
+    color: red;
+    font-size: 14px;
+}
+
+/* Nút Forgot Password */
+.auth-container .forgot-password-btn {
+    background-color: transparent;
+    color: #007bff; /* Màu xanh dương giống Sign In */
+    text-decoration: underline;
+    border: none;
+    cursor: pointer;
+    display: block; /* Hiển thị thành một dòng riêng */
+    margin-top: 10px; /* Tạo khoảng cách với nút Sign In */
+}
+
+/* Hover effect */
+.auth-container button:hover {
+    opacity: 0.8;
+}
