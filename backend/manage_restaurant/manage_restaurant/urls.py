@@ -1,5 +1,3 @@
-
-
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework import  permissions
@@ -34,4 +32,7 @@ urlpatterns = [
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('',include('home.urls')),
     path('',include('cart.urls')),
+    path('',include('order.urls')),
+    path('',include('checkout.urls')),
+    path('',include('table_reservations.urls')),
 ]

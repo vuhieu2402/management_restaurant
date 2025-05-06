@@ -8,8 +8,74 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from.models import Order, OrderDetails
 from cart.models import Cart, CartItems
 from home.models import Dish
-from .serializers import OrderDetailsSerializer
+from .serializers import OrderDetailsSerializer, OrderSerializer
+from checkout.models import Payment
 
 
 class OrderViewSet(viewsets.ViewSet):
-    
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+
+    @action(detail=False, methods=['post'])
+    def place_order(self, request):
+
+        print("User gửi request:", request.user)  # ✅ Debug
+
+        if not request.user.is_authenticated:
+            return Response({"error": "Bạn chưa đăng nhập!"}, status=401)
+
+        user = request.user
+        address = request.data.get('address')
+        phone = request.data.get('phone')
+        payment_method = request.data.get('payment_method')
+
+        print("📩 Dữ liệu nhận từ frontend:", request.data)
+
+        if not address or not phone:
+            return Response({"error": "Address and phone number are required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        cart = get_object_or_404(Cart, user=user)
+        cart_items = CartItems.objects.filter(cart=cart)
+
+        if not cart_items.exists():
+            return Response({"error": "No items in cart"}, status=status.HTTP_400_BAD_REQUEST)
+
+        total_price = sum(item.quantity * item.dish.price for item in cart_items)
+
+        # Tạo đơn hàng
+        order = Order.objects.create(
+            user_id=user,
+            total_price=total_price,
+            address=address,
+            phone=phone,
+            status=False
+        )
+
+        # Lưu từng món vào OrderDetails
+        for item in cart_items:
+            OrderDetails.objects.create(
+                order_id=order,
+                dish_id=item.dish,
+                quantity=item.quantity,
+                unit_price=item.dish.price
+            )
+
+        # Tạo thanh toán
+        Payment.objects.create(
+            order=order,
+            payment_method=payment_method,
+            status=True if payment_method == "COD" else False  # Nếu COD, thanh toán ngay
+        )
+
+        cart_items.delete()
+
+        return Response({"message": "Order placed successfully", "order_id": order.id}, status=status.HTTP_201_CREATED)
+
+
+
+    @action(detail=False, methods=['get'], url_path='history')
+    def order_history(self, request):
+        user = request.user
+        orders = Order.objects.filter(user_id=user).order_by("-order_date")
+        serializer = OrderSerializer(orders, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)

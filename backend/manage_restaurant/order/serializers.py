@@ -10,8 +10,9 @@ class OrderDetailsSerializer(serializers.ModelSerializer):
         model = OrderDetails
         fields = ['dish_id', 'dish_name', 'dish_img', 'quantity', 'unit_price']
 
-class OrderDetails(serializers.ModelSerializer):
-    details = OrderDetailsSerializer(soure="orderdetails_set", many=True, readonly=True)
+class OrderSerializer(serializers.ModelSerializer):
+    details = OrderDetailsSerializer(source="orderdetails_set", many=True, read_only=True)
+
 
     class Meta:
         model = Order
