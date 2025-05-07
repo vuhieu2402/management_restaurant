@@ -79,3 +79,19 @@ class OrderViewSet(viewsets.ViewSet):
         orders = Order.objects.filter(user_id=user).order_by("-order_date")
         serializer = OrderSerializer(orders, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['get'], url_path='manager-list')
+    def manager_list_orders(self, request):
+        user = request.user
+        if not (user.is_staff or user.is_superuser):
+            return Response({'detail': 'Permission denied.'}, status=403)
+
+        year = request.query_params.get('year')
+        month = request.query_params.get('month')
+        orders = Order.objects.all().order_by('-order_date')
+        if year:
+            orders = orders.filter(order_date__year=year)
+        if month:
+            orders = orders.filter(order_date__month=month)
+        serializer = OrderSerializer(orders, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)

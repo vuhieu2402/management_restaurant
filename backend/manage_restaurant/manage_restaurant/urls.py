@@ -8,6 +8,7 @@ from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
 )
+from user.views import VerifyEmailView
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -26,6 +27,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
+    path('api/verify/<uuid:token>/', VerifyEmailView.as_view(), name='direct_verify_email'),
     path('api/user/',include('user.urls', namespace='user')),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),

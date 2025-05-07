@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from .serializers import CustomUserSerializer, ResetPasswordSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.core.mail import send_mail
 from django.conf import settings
 from django.contrib.sites.shortcuts import get_current_site
@@ -133,3 +133,65 @@ class BlacklistTokenUpdateView(APIView):
             return Response(status=status.HTTP_205_RESET_CONTENT)
         except Exception as e:
             return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
+
+
+# API trả về thông tin user hiện tại
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def user_me(request):
+    user = request.user
+    return Response({
+        "id": user.id,
+        "email": user.email,
+        "user_name": getattr(user, "user_name", ""),
+        "first_name": getattr(user, "first_name", ""),
+        "is_superuser": user.is_superuser,
+        "is_staff": user.is_staff,
+        "is_active": user.is_active,
+    })
+
+# API doanh thu 12 tháng gần nhất
+from datetime import datetime, timedelta
+from django.db.models import Sum
+from order.models import Order
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def manager_revenue(request):
+    # Chỉ cho phép staff hoặc superuser
+    if not (request.user.is_staff or request.user.is_superuser):
+        return Response({'detail': 'Permission denied.'}, status=403)
+    today = datetime.today()
+    months = []
+    for i in range(11, -1, -1):
+        month = (today.replace(day=1) - timedelta(days=30 * i)).strftime('%Y-%m')
+        months.append(month)
+    data = []
+    for m in months:
+        year, month = map(int, m.split('-'))
+        revenue = Order.objects.filter(
+            order_date__year=year,
+            order_date__month=month,
+            status=True
+        ).aggregate(total=Sum('total_price'))['total'] or 0
+        data.append({"month": f"{year}-{month:02d}", "revenue": float(revenue)})
+    return Response(data)
+
+# API thống kê user theo vai trò
+from .models import NewUser
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def manager_user_stats(request):
+    if not (request.user.is_staff or request.user.is_superuser):
+        return Response({'detail': 'Permission denied.'}, status=403)
+    total = NewUser.objects.count()
+    staff = NewUser.objects.filter(is_staff=True).count()
+    superuser = NewUser.objects.filter(is_superuser=True).count()
+    active = NewUser.objects.filter(is_active=True, is_staff=False, is_superuser=False).count()
+    data = [
+        {"role": "Total", "count": total},
+        {"role": "Staff", "count": staff},
+        {"role": "Superuser", "count": superuser},
+        {"role": "Active User", "count": active},
+    ]
+    return Response(data)
