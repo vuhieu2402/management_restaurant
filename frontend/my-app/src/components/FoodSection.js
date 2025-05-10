@@ -54,7 +54,7 @@ const FoodSection = () => {
   }, []);
 
   return (
-    <section className="food_section layout_padding-bottom">
+    <section id="menu" className="food_section layout_padding-bottom">
       <div className="container">
         <div className="heading_container heading_center">
           <h2>Our Menu</h2>

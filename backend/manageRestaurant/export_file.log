@@ -1,0 +1,13 @@
+INFO 2025-05-09 14:26:11,410 tasks 22 140270225550208 Connecting to MinIO: endpoint=minio:9000, bucket=restaurant-exports, ssl=False
+INFO 2025-05-09 14:26:11,460 tasks 22 140270225550208 Uploading file to: restaurant-exports/2025/05/09/order_report_387f9b0b.csv
+INFO 2025-05-09 14:29:50,785 tasks 22 140270225550208 Connecting to MinIO: endpoint=minio:9000, bucket=restaurant-exports, ssl=False
+INFO 2025-05-09 14:29:50,922 tasks 22 140270225550208 Uploading file to: restaurant-exports/2025/05/09/order_report_3e90d0a6.csv
+INFO 2025-05-09 14:31:26,043 tasks 22 140270225550208 Connecting to MinIO: endpoint=minio:9000, bucket=restaurant-exports, ssl=False
+INFO 2025-05-09 14:31:26,051 tasks 22 140270225550208 Uploading file to: restaurant-exports/2025/05/09/order_report_be2467ab.csv
+INFO 2025-05-09 14:52:03,698 tasks 22 139927117077376 Connecting to MinIO: endpoint=minio:9000, bucket=restaurant-exports, ssl=False
+INFO 2025-05-09 14:52:03,817 tasks 22 139927117077376 Uploading file to: restaurant-exports/2025/05/09/order_report_1fe512b7.csv
+INFO 2025-05-09 14:52:04,956 views 50 140502586869440 Download request received: User=manage, Auth=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQ2ODAyMzc0LCJpYXQiOjE3NDY4MDIzMTQsImp0aSI6IjZhMDJmYzA0NDNiYjQ4YWFiODE2MmM2MjUwZWEyYjgwIiwidXNlcl9pZCI6MTN9.zlmkkYyi8I1JtbuHB9G9TzUosI0JZnAO3nEl_GSLXa8
+INFO 2025-05-09 14:52:04,957 views 50 140502586869440 Headers: {'Content-Length': '', 'Content-Type': 'text/plain', 'Host': 'localhost:8000', 'Connection': 'keep-alive', 'Sec-Ch-Ua-Platform': '"Windows"', 'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQ2ODAyMzc0LCJpYXQiOjE3NDY4MDIzMTQsImp0aSI6IjZhMDJmYzA0NDNiYjQ4YWFiODE2MmM2MjUwZWEyYjgwIiwidXNlcl9pZCI6MTN9.zlmkkYyi8I1JtbuHB9G9TzUosI0JZnAO3nEl_GSLXa8', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36', 'Accept': 'application/json, text/plain, */*', 'Sec-Ch-Ua': '"Chromium";v="136", "Brave";v="136", "Not.A/Brand";v="99"', 'Sec-Ch-Ua-Mobile': '?0', 'Sec-Gpc': '1', 'Accept-Language': 'en-US,en;q=0.5', 'Origin': 'http://localhost:3000', 'Sec-Fetch-Site': 'same-site', 'Sec-Fetch-Mode': 'cors', 'Sec-Fetch-Dest': 'empty', 'Referer': 'http://localhost:3000/', 'Accept-Encoding': 'gzip, deflate, br, zstd'}
+INFO 2025-05-09 14:52:04,962 views 50 140502586869440 Downloading from MinIO: endpoint=minio:9000, file=order_report_1fe512b7.csv
+INFO 2025-05-09 14:52:04,968 views 50 140502586869440 Retrieving object: bucket=restaurant-exports, object=2025/05/09/order_report_1fe512b7.csv
+INFO 2025-05-09 14:52:05,139 views 50 140502586869440 File download prepared successfully: order_report_1fe512b7.csv

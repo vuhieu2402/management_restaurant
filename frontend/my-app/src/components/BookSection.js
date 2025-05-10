@@ -1,24 +1,8 @@
-import React, { useState } from "react";
+import React from "react";
+import { Link } from "react-router-dom";
+import BookTable from "./BookTable";
 
 const BookSection = () => {
-  const [formData, setFormData] = useState({
-    name: "",
-    phone: "",
-    email: "",
-    persons: "",
-    date: "",
-  });
-
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("Booking details:", formData);
-    alert("Table booked successfully!");
-  };
-
   return (
     <section className="book_section layout_padding">
       <div className="container">
@@ -30,73 +14,7 @@ const BookSection = () => {
         <div className="row">
           {/* Form đặt bàn */}
           <div className="col-md-6">
-            <div className="form_container">
-              <form onSubmit={handleSubmit}>
-                <div>
-                  <input
-                    type="text"
-                    className="form-control"
-                    placeholder="Your Name"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-                <div>
-                  <input
-                    type="text"
-                    className="form-control"
-                    placeholder="Phone Number"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-                <div>
-                  <input
-                    type="email"
-                    className="form-control"
-                    placeholder="Your Email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-                <div>
-                  <select
-                    className="form-control nice-select wide"
-                    name="persons"
-                    value={formData.persons}
-                    onChange={handleChange}
-                    required
-                  >
-                    <option value="" disabled>
-                      How many persons?
-                    </option>
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                    <option value="4">4</option>
-                    <option value="5">5</option>
-                  </select>
-                </div>
-                <div>
-                  <input
-                    type="date"
-                    className="form-control"
-                    name="date"
-                    value={formData.date}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-                <div className="btn_box">
-                  <button type="submit">Book Now</button>
-                </div>
-              </form>
-            </div>
+            <BookTable isHomePage={true} />
           </div>
 
           {/* Bản đồ */}
@@ -114,6 +32,11 @@ const BookSection = () => {
                   allowFullScreen
                 ></iframe>
               </div>
+            </div>
+            <div className="text-center mt-4">
+              <Link to="/book-table" className="btn btn-primary">
+                Đặt Bàn Chi Tiết
+              </Link>
             </div>
           </div>
         </div>

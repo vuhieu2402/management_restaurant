@@ -2,7 +2,7 @@ import React from "react";
 
 const AboutSection = () => {
   return (
-    <section className="about_section layout_padding">
+    <section id="about" className="about_section layout_padding">
       <div className="container">
         <div className="row">
           {/* Hình ảnh bên trái */}

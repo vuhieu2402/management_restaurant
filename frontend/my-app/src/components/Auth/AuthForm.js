@@ -32,14 +32,26 @@ const AuthForm = ({ isLogin, toggleForm }) => {
             if (isLogin) {
                 localStorage.setItem("access_token", response.data.access);
                 localStorage.setItem("refresh_token", response.data.refresh);
-                
-                // Lưu thông tin người dùng vào context
-                login({ email: formData.email });
+
+                // Gọi API lấy thông tin user chi tiết
+                const userInfoRes = await axios.get("http://127.0.0.1:8000/api/user/me/", {
+                    headers: { Authorization: `Bearer ${response.data.access}` }
+                });
+                const userData = userInfoRes.data;
+                login(userData);
 
                 alert("Login successful!");
 
-                // Chuyển hướng về trang chủ
-                navigate("/");
+                // Chuyển hướng theo quyền
+                if (userData.is_superuser) {
+                    window.location.href = "/admin";
+                } else if (userData.is_staff) {
+                    navigate("/manager");
+                } else if (userData.is_active) {
+                    navigate("/");
+                } else {
+                    alert("Tài khoản không hợp lệ!");
+                }
             } else {
                 alert("Register successful! You can now log in.");
                 toggleForm(); // Chuyển sang form đăng nhập

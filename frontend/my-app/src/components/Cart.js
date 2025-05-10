@@ -94,14 +94,15 @@
 
 
 
-import React, { useContext, useState } from "react";
+import React, { useContext } from "react";
 import { CartContext } from "../context/CartContext";
+import { useNavigate } from "react-router-dom";
 
 const CLOUDINARY_BASE_URL = "https://res.cloudinary.com/dtubffjwu/";
 
 const Cart = () => {
-  const { cartItems, removeFromCart, updateQuantity } = useContext(CartContext);
-  const [selectedItems, setSelectedItems] = useState([]);
+  const { cartItems, removeFromCart, updateQuantity, selectedItems, setSelectedItems } = useContext(CartContext);
+  const navigate = useNavigate();
 
   // Xử lý chọn món ăn
   const toggleSelectItem = (dishId) => {
@@ -118,6 +119,21 @@ const Cart = () => {
   const shippingCost = selectedCartItems.length > 0 ? 5 : 0; // Ví dụ phí ship $5 nếu có ít nhất 1 món
   const grandTotal = subtotal + shippingCost;
 
+  // Xử lý chuyển sang trang Checkout
+  const handleCheckout = () => {
+    const selectedCartItems = cartItems.filter((item) => selectedItems.includes(item.dish.id));
+  
+    console.log("🛒 Danh sách món hàng đã chọn:", selectedCartItems);
+  
+    if (selectedCartItems.length === 0) {
+      alert("Vui lòng chọn ít nhất một món ăn trước khi thanh toán.");
+      return;
+    }
+  
+    navigate("/checkout");
+  };
+  
+
   return (
     <div className="container">
       <h2>Shopping Cart</h2>
@@ -133,7 +149,7 @@ const Cart = () => {
           </tr>
         </thead>
         <tbody>
-          {Array.isArray(cartItems) && cartItems.length > 0 ? (
+          {cartItems.length > 0 ? (
             cartItems.map((item) => {
               const dish = item.dish || {};
               const price = parseFloat(dish.price) || 0;
@@ -237,9 +253,9 @@ const Cart = () => {
                 </a>
               </td>
               <td>
-                <a href="/checkout" className="btn btn-success">
+                <button onClick={handleCheckout} className="btn btn-success">
                   Checkout <span className="glyphicon glyphicon-play"></span>
-                </a>
+                </button>
               </td>
               <td>
                 <a href="/order-history" className="btn btn-default">

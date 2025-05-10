@@ -1,0 +1,115 @@
+version: '3'
+
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    environment:
+      - DEBUG=True
+      - DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1,backend
+      - DATABASE_URL=sqlite:///db.sqlite3
+      - CORS_ALLOWED_ORIGINS=http://localhost:3000,http://frontend:3000
+      - CLOUDINARY_CLOUD_NAME='dtubffjwu'
+      - CLOUDINARY_API_KEY='323353488655133'
+      - CLOUDINARY_API_SECRET='5lFIv6W9xfDmvwj5kePFDKkHWZs'
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=django-db
+      - MINIO_ENDPOINT=minio:9000
+      - MINIO_ACCESS_KEY=minioadmin
+      - MINIO_SECRET_KEY=minioadmin
+      - MINIO_USE_SSL=False
+      - MINIO_BUCKET_NAME=restaurant-exports
+    command: >
+      bash -c "python manage.py migrate --noinput &&
+               python docker_seed_data.py &&
+               python init_minio.py &&
+               python manage.py runserver 0.0.0.0:8000"
+    depends_on:
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    restart: always
+    healthcheck:
+      test: curl -f http://localhost:8000/api/ || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  celery_worker:
+    build: ./backend
+    command: celery -A manage_restaurant worker --loglevel=info
+    volumes:
+      - ./backend:/app
+    environment:
+      - DEBUG=True
+      - DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1,backend
+      - DATABASE_URL=sqlite:///db.sqlite3
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=django-db
+      - MINIO_ENDPOINT=minio:9000
+      - MINIO_ACCESS_KEY=minioadmin
+      - MINIO_SECRET_KEY=minioadmin
+      - MINIO_USE_SSL=False
+      - MINIO_BUCKET_NAME=restaurant-exports
+    depends_on:
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      backend:
+        condition: service_started
+    restart: always
+    healthcheck:
+      test: celery -A manage_restaurant inspect ping
+      interval: 10s
+      timeout: 10s
+      retries: 5
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    restart: always
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  minio:
+    image: minio/minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin
+    command: server /data --console-address ":9001" --address ":9000"
+    volumes:
+      - minio_data:/data
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_URL=http://localhost:8000/api
+      - NODE_ENV=production
+      - CI=false  # Để build không dừng lại khi có warnings
+    depends_on:
+      - backend
+    restart: always
+
+volumes:
+  minio_data: 
