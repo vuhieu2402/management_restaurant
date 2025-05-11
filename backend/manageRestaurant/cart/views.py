@@ -4,9 +4,13 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.decorators import action
-from .models import Cart, CartItems
-from .serializers import CartSerializer, CartItemsSerializer
-from home.models import Dish
+from .serializers import CartSerializer
+from .services import (
+    get_user_cart,
+    add_item_to_cart,
+    remove_item_from_cart,
+    update_item_quantity
+)
 
 class CartViewSet(viewsets.ViewSet):  # Chuyển từ ModelViewSet -> ViewSet
     permission_classes = [IsAuthenticated]
@@ -21,7 +25,7 @@ class CartViewSet(viewsets.ViewSet):  # Chuyển từ ModelViewSet -> ViewSet
         if not request.user or not request.user.is_authenticated:
             return Response({"detail": "User is not authenticated"}, status=status.HTTP_401_UNAUTHORIZED)
 
-        cart, created = Cart.objects.get_or_create(user=request.user)
+        cart = get_user_cart(request.user)
         serializer = CartSerializer(cart)
         return Response(serializer.data)
 
@@ -32,16 +36,8 @@ class CartViewSet(viewsets.ViewSet):  # Chuyển từ ModelViewSet -> ViewSet
         dish_id = request.data.get('dish_id')
         quantity = request.data.get('quantity', 1)
 
-        cart, created = Cart.objects.get_or_create(user=user)
-        dish = get_object_or_404(Dish, id=dish_id)
-
-        cart_item, created = CartItems.objects.get_or_create(
-            cart=cart, dish=dish
-        )
-        cart_item.quantity += int(quantity)
-        cart_item.save()
-
-        return Response({"message": "Item added to cart"}, status=status.HTTP_200_OK)
+        result = add_item_to_cart(user, dish_id, quantity)
+        return Response(result, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['post'])
     def remove_from_cart(self, request):
@@ -49,13 +45,8 @@ class CartViewSet(viewsets.ViewSet):  # Chuyển từ ModelViewSet -> ViewSet
         user = request.user
         dish_id = request.data.get('dish_id')
 
-        cart = get_object_or_404(Cart, user=user)
-        cart_item = get_object_or_404(CartItems, cart=cart, dish_id=dish_id)
-
-        cart_item.delete()
-
-        return Response({"message": "Item removed from cart"}, status=status.HTTP_200_OK)
-
+        result = remove_item_from_cart(user, dish_id)
+        return Response(result, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['post'])
     def update_quantity(self, request):
@@ -64,15 +55,5 @@ class CartViewSet(viewsets.ViewSet):  # Chuyển từ ModelViewSet -> ViewSet
         dish_id = request.data.get('dish_id')
         quantity = request.data.get('quantity')
 
-        cart = get_object_or_404(Cart, user=user)
-        cart_item = get_object_or_404(CartItems, cart=cart, dish_id=dish_id)
-
-
-        if int(quantity) > 0 :
-            cart_item.quantity = int(quantity)
-            cart_item.save()
-            return Response({"message": "Quantity updated"}, status=status.HTTP_200_OK)
-
-        else:
-            cart_item.delete()  # Xóa món nếu số lượng = 0
-            return Response({"message": "Item removed from cart"}, status=status.HTTP_200_OK)
+        result = update_item_quantity(user, dish_id, quantity)
+        return Response(result, status=status.HTTP_200_OK)
