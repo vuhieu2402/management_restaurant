@@ -1,0 +1,244 @@
+.chatbot-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.chat-toggle-button {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 50px;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+.chat-toggle-button:hover {
+  background-color: #45a049;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+.chat-window {
+  position: absolute;
+  bottom: 70px;
+  right: 0;
+  width: 350px;
+  height: 500px;
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.chat-header {
+  background-color: #4CAF50;
+  color: white;
+  padding: 10px 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.chat-header h3 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.chat-header button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.chat-messages {
+  flex: 1;
+  padding: 15px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.message {
+  max-width: 80%;
+  padding: 10px 15px;
+  border-radius: 18px;
+  margin-bottom: 8px;
+  word-wrap: break-word;
+}
+
+.message.user {
+  align-self: flex-end;
+  background-color: #DCF8C6;
+  border-bottom-right-radius: 5px;
+}
+
+.message.bot {
+  align-self: flex-start;
+  background-color: #F1F0F0;
+  border-bottom-left-radius: 5px;
+}
+
+.chat-input {
+  display: flex;
+  padding: 10px;
+  border-top: 1px solid #ddd;
+}
+
+.chat-input input {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  outline: none;
+  font-size: 14px;
+}
+
+.chat-input button {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 0 15px;
+  margin-left: 10px;
+  cursor: pointer;
+}
+
+.chat-input button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+/* Loading animation */
+.typing-indicator {
+  display: flex;
+  gap: 5px;
+}
+
+.typing-indicator span {
+  width: 8px;
+  height: 8px;
+  background-color: #aaa;
+  border-radius: 50%;
+  display: inline-block;
+  animation: bounce 1.4s infinite ease-in-out both;
+}
+
+.typing-indicator span:nth-child(1) {
+  animation-delay: -0.32s;
+}
+
+.typing-indicator span:nth-child(2) {
+  animation-delay: -0.16s;
+}
+
+@keyframes bounce {
+  0%, 80%, 100% { 
+    transform: scale(0);
+  } 40% { 
+    transform: scale(1.0);
+  }
+}
+
+/* Recommendations styling */
+.recommendations-container {
+  padding: 10px 15px;
+  background-color: #f9f9f9;
+  border-top: 1px solid #ddd;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.recommendations-container h4 {
+  margin: 5px 0;
+  color: #333;
+  font-size: 16px;
+}
+
+.recommendations-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.recommendation-item {
+  background-color: white;
+  border-radius: 8px;
+  padding: 10px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.recommendation-details h5 {
+  margin: 0 0 5px 0;
+  color: #333;
+  font-size: 16px;
+}
+
+.recommendation-details p {
+  margin: 5px 0;
+  font-size: 14px;
+  color: #666;
+}
+
+.recommendation-details .price {
+  font-weight: bold;
+  color: #4CAF50;
+}
+
+.recommendation-details .reasoning {
+  font-style: italic;
+  font-size: 13px;
+  color: #888;
+}
+
+.recommendation-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.recommendation-actions button {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.recommendation-actions button:first-child {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.recommendation-actions .reject-btn {
+  background-color: transparent;
+  border: 1px solid #ccc;
+  color: #666;
+}
+
+@media (max-width: 480px) {
+  .chat-window {
+    width: 90vw;
+    height: 70vh;
+  }
+  
+  .chatbot-container {
+    width: 100%;
+    bottom: 10px;
+    right: 10px;
+  }
+} 

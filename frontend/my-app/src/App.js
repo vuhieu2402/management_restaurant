@@ -20,6 +20,7 @@ import Profile from "./pages/Profile";
 import SearchResult from "./pages/SearchResult";
 import ManagerDashboard from "./pages/ManagerDashboard";
 import ManagerOrders from "./pages/ManagerOrders";
+import ChatBot from './components/ChatBot';
 
 function App() {
   return (
@@ -49,6 +50,7 @@ function App() {
           <Route path="/manager" element={<ManagerDashboard />} />
           <Route path="/manager/orders" element={<ManagerOrders />} />
         </Routes>
+        <ChatBot />
       </CartProvider>
     </AuthProvider>
   );
