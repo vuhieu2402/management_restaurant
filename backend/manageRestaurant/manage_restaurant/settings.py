@@ -20,7 +20,7 @@ SECRET_KEY = "django-insecure-1eieu7(9t7a^uu&pa$&#2vf%vtcr(#m3+eh(sa_w67kv-80#sv
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
 
 # Application definition
@@ -225,7 +225,7 @@ VNPAY_TMN_CODE = 'BO8K2CIP'  # Website ID in VNPAY System, get from config
 VNPAY_HASH_SECRET_KEY = 'SXX0OO53FLCQPKLBDCQM1FA6CH2JHJSR'  # Secret key for create checksum,get from config
 
 # Cấu hình Celery
-CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'redis://localhost:6379/0')
 CELERY_RESULT_BACKEND = 'django-db'
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
@@ -288,10 +288,17 @@ LOGGING = {
 
 
 
-OPENROUTER_API_KEY = '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'  # Thêm API key của bạn từ OpenRouter tại đây
+# Cấu hình OpenRouter
+OPENROUTER_API_KEY = os.environ.get('OPENROUTER_API_KEY', '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')
 OPENROUTER_API_BASE = 'https://openrouter.ai/api/v1'
 OPENROUTER_MODEL = 'deepseek/deepseek-chat-v3-0324'  
-USE_OPENROUTER = True  
+USE_OPENROUTER = True
+
+# Add better debug logs for API keys
+if DEBUG:
+    print(f"OpenRouter API Key: {OPENROUTER_API_KEY[:4]}{'*' * (len(OPENROUTER_API_KEY) - 8)}{OPENROUTER_API_KEY[-4:]}")
+    print(f"Using model: {OPENROUTER_MODEL}")
+    print(f"API Base: {OPENROUTER_API_BASE}")
 
 # Cấu hình Channels
 ASGI_APPLICATION = 'manage_restaurant.asgi.application'
@@ -301,7 +308,7 @@ CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            'hosts': [('127.0.0.1', 6379)],
+            'hosts': [(os.environ.get('REDIS_HOST', '127.0.0.1'), 6379)],
         },
     },
 }  

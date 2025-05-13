@@ -6,17 +6,28 @@ from django.db import transaction
 from .models import Conversation, Message, RecommendedDish, UserPreference
 from home.models import Dish, Category
 from openai import OpenAI
+import logging
+import os
 
 # Khởi tạo client OpenAI hoặc OpenRouter dựa vào cấu hình
 def get_ai_client():
     """
     Khởi tạo client OpenAI hoặc OpenRouter dựa vào cấu hình
     """
+    logger = logging.getLogger(__name__)
+    
     if getattr(settings, 'USE_OPENROUTER', False):
         # Sử dụng OpenRouter
+        # Ưu tiên lấy API key từ environment variable trực tiếp nếu có
+        api_key = os.environ.get('OPENROUTER_API_KEY') or settings.OPENROUTER_API_KEY
+        base_url = settings.OPENROUTER_API_BASE
+        
+        logger.info(f"Using OpenRouter with base URL: {base_url}")
+        logger.info(f"API key (first 4 chars): {api_key[:4]}{'*' * (len(api_key) - 8)}{api_key[-4:]}")
+        
         client = OpenAI(
-            api_key=settings.OPENROUTER_API_KEY,
-            base_url=settings.OPENROUTER_API_BASE,
+            api_key=api_key,
+            base_url=base_url,
             default_headers={
                 "HTTP-Referer": "https://restaurant-management-app.com",
                 "X-Title": "Restaurant Management System"
@@ -25,7 +36,8 @@ def get_ai_client():
         return client
     else:
         # Sử dụng OpenAI trực tiếp
-        return OpenAI(api_key=settings.OPENAI_API_KEY)
+        api_key = os.environ.get('OPENAI_API_KEY') or settings.OPENAI_API_KEY
+        return OpenAI(api_key=api_key)
 
 # Lấy model AI đang được cấu hình
 def get_ai_model():
@@ -154,6 +166,8 @@ def get_dish_recommendations(conversation, user_message, max_recommendations=3):
     """
     Lấy đề xuất món ăn dựa trên tin nhắn của người dùng và ngữ cảnh hội thoại
     """
+    logger = logging.getLogger(__name__)
+    
     # Lấy danh sách món ăn
     all_dishes = Dish.objects.all()
     all_categories = Category.objects.all()
@@ -248,37 +262,74 @@ def get_dish_recommendations(conversation, user_message, max_recommendations=3):
                 continue
         
         return bot_message, saved_recommendations
-    
     except Exception as e:
-        print(f"Error in recommendation generation: {e}")
-        return "Xin lỗi, tôi đang gặp vấn đề kỹ thuật khi đề xuất món ăn. Bạn có thể cho tôi biết thêm về sở thích của bạn không?", []
+        logger.error(f"Error in dish recommendations: {str(e)}", exc_info=True)
+        
+        # Kiểm tra nếu là lỗi xác thực API key
+        error_message = str(e).lower()
+        if "401" in error_message or "unauthorized" in error_message or "authentication" in error_message:
+            bot_message = "Xin lỗi, hệ thống chatbot hiện đang gặp vấn đề xác thực API. Vui lòng liên hệ quản trị viên để cập nhật API key cho OpenRouter."
+            logger.error("OpenRouter API authentication error. Please update the API key in your environment variables.")
+        else:
+            bot_message = "Xin lỗi, tôi đang gặp vấn đề khi tìm kiếm món ăn phù hợp. Vui lòng thử lại sau."
+        
+        return bot_message, []
 
 @transaction.atomic
 def process_chat_message(user_message, session_id=None, user=None):
     """
-    Xử lý tin nhắn từ người dùng và tạo phản hồi
+    Xử lý tin nhắn của người dùng và tạo phản hồi từ chatbot
     """
+    logger = logging.getLogger(__name__)
+    
     # Tạo hoặc lấy cuộc trò chuyện
     conversation = create_or_get_conversation(session_id, user)
     
-    # Lưu tin nhắn người dùng
+    # Lưu tin nhắn của người dùng
     add_message(conversation, user_message, 'user')
     
-    # Phát hiện sở thích từ tin nhắn
-    process_preference_detection(conversation, user_message)
-    
-    # Tạo phản hồi và đề xuất món ăn
-    bot_message, recommendations = get_dish_recommendations(conversation, user_message)
-    
-    # Lưu tin nhắn bot
-    add_message(conversation, bot_message, 'bot')
-    
-    # Trả về kết quả
-    return {
-        'message': bot_message,
-        'session_id': conversation.session_id,
-        'recommendations': recommendations
-    }
+    try:
+        # Phát hiện sở thích người dùng từ tin nhắn
+        process_preference_detection(conversation, user_message)
+        
+        # Lấy đề xuất món ăn
+        bot_message, recommendations = get_dish_recommendations(conversation, user_message)
+        
+        # Lưu phản hồi của bot
+        add_message(conversation, bot_message, 'bot')
+        
+        # Chuẩn bị kết quả trả về
+        result = {
+            'message': bot_message,
+            'session_id': conversation.session_id,
+            'recommendations': []
+        }
+        
+        # Thêm thông tin đề xuất vào kết quả
+        for rec in recommendations:
+            result['recommendations'].append({
+                'id': rec.id,
+                'dish_id': rec.dish.id,
+                'dish_name': rec.dish.name,
+                'dish_image': rec.dish.get_image_url() if hasattr(rec.dish, 'get_image_url') else None,
+                'reasoning': rec.reasoning
+            })
+        
+        return result
+        
+    except Exception as e:
+        logger.error(f"Error processing chat message: {str(e)}", exc_info=True)
+        
+        # Lưu phản hồi lỗi của bot
+        error_message = "Xin lỗi, tôi đang gặp vấn đề kết nối. Vui lòng thử lại sau."
+        add_message(conversation, error_message, 'bot')
+        
+        # Trả về kết quả với thông báo lỗi
+        return {
+            'message': error_message,
+            'session_id': conversation.session_id,
+            'recommendations': []
+        }
 
 def mark_recommendation_feedback(recommendation_id, accepted):
     """

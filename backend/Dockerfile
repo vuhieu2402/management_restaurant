@@ -3,7 +3,7 @@ FROM python:3.10-slim
 WORKDIR /app
 
 # Cài đặt các packages cần thiết
-RUN apt-get update && apt-get install -y bash gcc python3-dev
+RUN apt-get update && apt-get install -y bash gcc python3-dev libffi-dev curl
 
 # Copy requirements file và cài đặt dependencies
 COPY requirements.txt .
@@ -15,15 +15,15 @@ COPY . .
 # Tạo thư mục cho export_files
 RUN mkdir -p /app/manageRestaurant/export_files
 
-# Chuyển đến thư mục manageRestaurant
-WORKDIR /app/manageRestaurant
-
 # Đảm bảo các script có quyền thực thi
-RUN chmod +x seed_data.py
-RUN chmod +x docker_seed_data.py
+RUN chmod +x start_server.sh
+RUN chmod +x check_server.sh
+RUN chmod +x celery_start.sh
+RUN chmod +x manageRestaurant/docker_seed_data.py
+RUN chmod +x manageRestaurant/init_minio.py
 
-# Expose cổng cho backend
+# Expose cổng cho backend và WebSocket
 EXPOSE 8000
 
-# Lệnh chạy được định nghĩa trong docker-compose.yml
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"] 
+# Sử dụng script start_server.sh để khởi động Django với Daphne
+CMD ["/bin/bash", "start_server.sh"] 

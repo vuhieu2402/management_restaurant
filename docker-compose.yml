@@ -22,11 +22,10 @@ services:
       - MINIO_SECRET_KEY=minioadmin
       - MINIO_USE_SSL=False
       - MINIO_BUCKET_NAME=restaurant-exports
-    command: >
-      bash -c "python manage.py migrate --noinput &&
-               python docker_seed_data.py &&
-               python init_minio.py &&
-               python manage.py runserver 0.0.0.0:8000"
+      - DJANGO_SETTINGS_MODULE=manage_restaurant.settings
+      - REDIS_HOST=redis
+      # IMPORTANT: Replace this with a valid API key from https://openrouter.ai/keys
+      - OPENROUTER_API_KEY=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
     depends_on:
       redis:
         condition: service_healthy
@@ -42,7 +41,8 @@ services:
 
   celery_worker:
     build: ./backend
-    command: celery -A manage_restaurant worker --loglevel=info
+    working_dir: /app
+    command: bash -c "/app/celery_start.sh"
     volumes:
       - ./backend:/app
     environment:
@@ -56,6 +56,10 @@ services:
       - MINIO_SECRET_KEY=minioadmin
       - MINIO_USE_SSL=False
       - MINIO_BUCKET_NAME=restaurant-exports
+      - DJANGO_SETTINGS_MODULE=manage_restaurant.settings
+      - REDIS_HOST=redis
+      # IMPORTANT: Replace this with a valid API key from https://openrouter.ai/keys
+      - OPENROUTER_API_KEY=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
     depends_on:
       redis:
         condition: service_healthy
@@ -65,7 +69,7 @@ services:
         condition: service_started
     restart: always
     healthcheck:
-      test: celery -A manage_restaurant inspect ping
+      test: bash -c "cd manageRestaurant && celery -A manage_restaurant inspect ping"
       interval: 10s
       timeout: 10s
       retries: 5
