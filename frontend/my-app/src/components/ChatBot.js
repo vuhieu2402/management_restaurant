@@ -271,8 +271,11 @@ const ChatBot = () => {
   return (
     <div className="chatbot-container">
       {/* Nút mở chatbot */}
-      <button className="chat-toggle-button" onClick={toggleChat}>
-        {isOpen ? 'Đóng chat' : 'Trợ lý AI'}
+      <button 
+        className="chat-toggle-button chatbot-toggle-button" 
+        onClick={toggleChat}
+      >
+        {isOpen ? 'Đóng gợi ý' : 'Gợi ý món ăn'}
       </button>
 
       {/* Cửa sổ chatbot */}

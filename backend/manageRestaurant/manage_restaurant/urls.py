@@ -40,6 +40,8 @@ urlpatterns = [
     path('',include('checkout.urls')),
     path('',include('table_reservations.urls')),
     path("api/exports/", include('export_file.urls')),
+    path('api/chatbot/', include('chatbot.urls', namespace='chatbot')),
+    path("api/live_chat/", include("live_chat.urls")),
 ]
 
 if settings.DEBUG:

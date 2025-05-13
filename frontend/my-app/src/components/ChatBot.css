@@ -8,7 +8,7 @@
   align-items: flex-end;
 }
 
-.chat-toggle-button {
+.chat-toggle-button.chatbot-toggle-button {
   background-color: #4CAF50;
   color: white;
   border: none;
@@ -19,9 +19,16 @@
   cursor: pointer;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   transition: all 0.3s ease;
+  position: relative;
 }
 
-.chat-toggle-button:hover {
+.chat-toggle-button.chatbot-toggle-button::before {
+  content: "🤖";
+  margin-right: 8px;
+  font-size: 18px;
+}
+
+.chat-toggle-button.chatbot-toggle-button:hover {
   background-color: #45a049;
   transform: translateY(-2px);
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);

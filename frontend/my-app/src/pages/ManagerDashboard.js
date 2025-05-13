@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { useAuth } from '../context/AuthContext'; // Import useAuth hook
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
@@ -11,6 +12,10 @@ const ManagerDashboard = () => {
   // Thêm state cho năm được chọn
   const currentYear = new Date().getFullYear();
   const [selectedYear, setSelectedYear] = useState(currentYear);
+  const { authState, loading: authLoading } = useAuth(); // Lấy thông tin từ context
+
+  // Kiểm tra quyền 
+  const isManager = authState.user && (authState.user.is_staff || authState.user.is_superuser);
 
   // Hàm lấy danh sách các năm có trong dữ liệu revenue
   const getAvailableYears = () => {
@@ -57,17 +62,44 @@ const ManagerDashboard = () => {
     fetchDashboardData();
   }, []);
 
+  if (authLoading) {
+    return <div>Đang tải thông tin người dùng...</div>;
+  }
+
+  if (!isManager) {
+    return (
+      <div style={{ padding: '32px', textAlign: 'center' }}>
+        <h2>Bạn không có quyền truy cập trang này</h2>
+        <p>Tính năng này chỉ dành cho quản lý. Vui lòng đăng nhập với tài khoản quản lý để tiếp tục.</p>
+        <button 
+          onClick={() => window.location.href = '/'}
+          style={{ padding: '8px 16px', background: '#3498db', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', marginTop: '20px' }}
+        >
+          Quay lại trang chủ
+        </button>
+      </div>
+    );
+  }
+
   if (loading) return <div>Loading dashboard...</div>;
 
   return (
     <div style={{ padding: '32px' }}>
       <h2>Manager Dashboard</h2>
-      <button
-        style={{ marginBottom: 24, padding: '8px 16px', fontWeight: 'bold', background: '#1976d2', color: '#fff', border: 'none', borderRadius: 4, cursor: 'pointer' }}
-        onClick={() => window.location.href = '/manager/orders'}
-      >
-        Xem danh sách đơn hàng
-      </button>
+      <div style={{ display: 'flex', gap: '16px', marginBottom: '24px' }}>
+        <button
+          style={{ padding: '8px 16px', fontWeight: 'bold', background: '#1976d2', color: '#fff', border: 'none', borderRadius: 4, cursor: 'pointer' }}
+          onClick={() => window.location.href = '/manager/orders'}
+        >
+          Xem danh sách đơn hàng
+        </button>
+        <button
+          style={{ padding: '8px 16px', fontWeight: 'bold', background: '#2ecc71', color: '#fff', border: 'none', borderRadius: 4, cursor: 'pointer' }}
+          onClick={() => window.location.href = '/admin/chat'}
+        >
+          Quản lý tin nhắn hỗ trợ
+        </button>
+      </div>
       <div style={{ marginBottom: 40 }}>
         <h3>Revenue (Last 12 Months)</h3>
         <div style={{ marginBottom: 16 }}>

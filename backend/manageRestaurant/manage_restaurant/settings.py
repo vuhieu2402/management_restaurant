@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'user',
     'checkout',
     'export_file',
+    'live_chat',
     'drf_yasg',
     'rest_framework',
     'rest_framework.authtoken',
@@ -51,6 +52,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'django_celery_results',
     'django_celery_beat',
+    'channels',
 ]
 
 MIDDLEWARE = [
@@ -155,7 +157,7 @@ REST_FRAMEWORK = {
 
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=1),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=10),
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
@@ -185,6 +187,27 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000"
 ]
 
+# Cấu hình CORS bổ sung
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_METHODS = [
+    "DELETE",
+    "GET",
+    "OPTIONS",
+    "PATCH",
+    "POST",
+    "PUT",
+]
+CORS_ALLOW_HEADERS = [
+    "accept",
+    "accept-encoding",
+    "authorization",
+    "content-type",
+    "dnt",
+    "origin",
+    "user-agent",
+    "x-csrftoken",
+    "x-requested-with",
+]
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
@@ -262,3 +285,23 @@ LOGGING = {
         },
     },
 }
+
+
+
+OPENROUTER_API_KEY = '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'  # Thêm API key của bạn từ OpenRouter tại đây
+OPENROUTER_API_BASE = 'https://openrouter.ai/api/v1'
+OPENROUTER_MODEL = 'deepseek/deepseek-chat-v3-0324'  
+USE_OPENROUTER = True  
+
+# Cấu hình Channels
+ASGI_APPLICATION = 'manage_restaurant.asgi.application'
+
+# Cấu hình Channel Layers với Redis
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            'hosts': [('127.0.0.1', 6379)],
+        },
+    },
+}  

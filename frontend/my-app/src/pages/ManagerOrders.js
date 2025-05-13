@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import config from '../config';
+import { useAuth } from '../context/AuthContext'; // Import useAuth hook
 
 const ManagerOrders = () => {
   const [orders, setOrders] = useState([]);
@@ -16,6 +17,10 @@ const ManagerOrders = () => {
   const [exporting, setExporting] = useState(false);
   const [exportSuccess, setExportSuccess] = useState(null);
   const [exportFileId, setExportFileId] = useState(null);
+  const { authState, loading: authLoading } = useAuth(); // Lấy thông tin từ context
+
+  // Kiểm tra quyền
+  const isManager = authState.user && (authState.user.is_staff || authState.user.is_superuser);
 
   // Lấy năm hiện tại
   const currentYear = new Date().getFullYear();
@@ -172,6 +177,26 @@ const ManagerOrders = () => {
     const now = new Date().getFullYear();
     return ['', now, now - 1, now - 2];
   };
+
+  // Render kiểm tra quyền truy cập
+  if (authLoading) {
+    return <div>Đang tải thông tin người dùng...</div>;
+  }
+
+  if (!isManager) {
+    return (
+      <div style={{ padding: '32px', textAlign: 'center' }}>
+        <h2>Bạn không có quyền truy cập trang này</h2>
+        <p>Tính năng này chỉ dành cho quản lý. Vui lòng đăng nhập với tài khoản quản lý để tiếp tục.</p>
+        <button 
+          onClick={() => window.location.href = '/'}
+          style={{ padding: '8px 16px', background: '#3498db', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', marginTop: '20px' }}
+        >
+          Quay lại trang chủ
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div style={{ padding: 24 }}>
